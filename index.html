@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>STM32 MQTT Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div id="loginPage" class="login-page">
+        <div class="login-card">
+            <h2 class="text-center mb-4">STM32 IoT Dashboard</h2>
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-control" id="loginUser">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" id="loginPassword">
+            </div>
+            <div class="d-grid">
+                <button class="btn btn-primary" onclick="login()">Login</button>
+            </div>
+            <div id="loginMsg" class="mt-3 text-danger text-center"></div>
+        </div>
+    </div>
+
+    <div id="dashboard" style="display:none;">
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <span class="navbar-brand">STM32 MQTT Dashboard</span>
+                <div class="d-flex align-items-center">
+                    <span id="clock" class="text-white me-3 fw-bold"></span>
+                    <span id="statusBadge" class="badge bg-danger">Disconnected</span>
+                    <button class="btn btn-info btn-sm me-2" data-bs-toggle="modal" data-bs-target="#settingsModal">⚙ Settings</button>
+                    <button class="btn btn-warning btn-sm ms-2" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid mt-3">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">MQTT Connection</div>
+                        <div class="card-body">
+                            <label class="form-label">Host</label>
+                            <input id="host" class="form-control" value="d250f5808fe441548a0028465e135386.s1.eu.hivemq.cloud">
+
+                            <label class="form-label mt-2">Port</label>
+                            <input id="port" class="form-control" value="8884">
+
+                            <label class="form-label mt-2">Username</label>
+                            <input id="username" class="form-control">
+
+                            <label class="form-label mt-2">Password</label>
+                            <input id="password" type="password" class="form-control">
+
+                            <label class="form-label mt-2">Client ID</label>
+                            <input id="clientid" class="form-control">
+
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" id="ssl" checked>
+                                <label class="form-check-label">SSL Enabled</label>
+                            </div>
+
+                            <div class="mt-3 d-flex gap-2">
+                                <button id="connectBtn" class="btn btn-success">Connect</button>
+                                <button id="disconnectBtn" class="btn btn-danger">Disconnect</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header bg-secondary text-white">Broker Information</div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                <div class="col-6"><b>Broker</b><div id="brokerInfo">--</div></div>
+                                <div class="col-6"><b>Port</b><div id="brokerPort">--</div></div>
+                                <div class="col-6"><b>Client ID</b><div id="clientInfo">--</div></div>
+                                <div class="col-6"><b>Topic</b><div id="topicInfo">--</div></div>
+                                <div class="col-12"><b>Uptime</b><div id="uptime">00:00:00</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">Publish Message</div>
+                        <div class="card-body">
+                            <label class="form-label">Topic</label>
+                            <input id="pubTopic" class="form-control" value="stm32/f407/command">
+
+                            <label class="form-label mt-2">Message</label>
+                            <input id="pubMessage" class="form-control">
+
+                            <button id="publishBtn" class="btn btn-primary mt-3">Publish</button>
+
+                            <div class="mt-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <button class="btn btn-success w-100" style="background:#2ecc71;border-color:#2ecc71;color:#fff;" onclick="sendCommand('GREEN_LED_ON')">GREEN LED ON</button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-outline-success w-100" onclick="sendCommand('GREEN_LED_OFF')">GREEN LED OFF</button>
+                                    </div>
+                                    <div class="col-6 mt-2">
+                                        <button class="btn btn-warning w-100" style="background:#f39c12;border-color:#f39c12;color:#fff;" onclick="sendCommand('ORANGE_LED_ON')">ORANGE LED ON</button>
+                                    </div>
+                                    <div class="col-6 mt-2">
+                                        <button class="btn btn-outline-warning w-100" onclick="sendCommand('ORANGE_LED_OFF')">ORANGE LED OFF</button>
+                                    </div>
+                                    <div class="col-6 mt-2">
+                                        <button class="btn btn-primary w-100" onclick="sendCommand('BLUE_LED_ON')">BLUE LED ON</button>
+                                    </div>
+                                    <div class="col-6 mt-2">
+                                        <button class="btn btn-outline-primary w-100" onclick="sendCommand('BLUE_LED_OFF')">BLUE LED OFF</button>
+                                    </div>
+                                    <div class="col-6 mt-2">
+                                        <button class="btn btn-danger w-100" onclick="sendCommand('RED_LED_ON')">RED LED ON</button>
+                                    </div>
+                                    <div class="col-6 mt-2">
+                                        <button class="btn btn-outline-danger w-100" onclick="sendCommand('RED_LED_OFF')">RED LED OFF</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-header bg-success">Device Status</div>
+                                <div class="card-body"><h3 id="deviceStatus">🔴 Offline</h3></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-header bg-primary">LED Status</div>
+                                <div class="card-body"><h3 id="ledStatus">⚫ OFF</h3></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-header bg-info">Messages/sec</div>
+                                <div class="card-body"><h3 id="msgRate">0</h3></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-header bg-warning">Last Packet</div>
+                                <div class="card-body"><h6 id="lastPacket">--</h6></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-header bg-danger">Alarm</div>
+                                <div class="card-body"><h4 id="alarmStatus">🟢 NORMAL</h4></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-header bg-info">Average ADC</div>
+                                <div class="card-body"><h3 id="avgADC">0</h3></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-header bg-warning">Min Temp</div>
+                                <div class="card-body"><h3 id="minTemp">--</h3></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-header bg-success">Max Temp</div>
+                                <div class="card-body"><h3 id="maxTemp">--</h3></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-header">ADC</div>
+                                <div class="card-body"><h2 id="adcValue">0</h2></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-header">Temperature</div>
+                                <div class="card-body"><h2 id="tempValue">0°C</h2></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-header">Messages</div>
+                                <div class="card-body"><h2 id="msgCount">0</h2></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">Live Charts</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <canvas id="tempChart"></canvas>
+                                </div>
+                                <div class="col-md-6">
+                                    <canvas id="adcChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">Gauges</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6 text-center">
+                                    <canvas id="tempGauge"></canvas>
+                                    <div class="mt-2">Temperature Gauge</div>
+                                </div>
+                                <div class="col-md-6 text-center">
+                                    <canvas id="adcGauge"></canvas>
+                                    <div class="mt-2">ADC Gauge</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">Received Data</div>
+                        <div class="card-body">
+                            <input type="text" id="searchTable" class="form-control mb-3" placeholder="Search by time, ADC or temperature">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Time</th>
+                                        <th>ADC</th>
+                                        <th>Temp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">STM32 Control Panel</div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                <div class="col-md-2"><button class="btn btn-success w-100" onclick="sendCommand('LED_ON')">LED ON</button></div>
+                                <div class="col-md-2"><button class="btn btn-danger w-100" onclick="sendCommand('LED_OFF')">LED OFF</button></div>
+                                <div class="col-md-2"><button class="btn btn-primary w-100" onclick="sendCommand('START')">START</button></div>
+                                <div class="col-md-2"><button class="btn btn-warning w-100" onclick="sendCommand('STOP')">STOP</button></div>
+                                <div class="col-md-2"><button class="btn btn-dark w-100" onclick="sendCommand('RESET')">RESET</button></div>
+                            </div>
+                            <hr>
+                            <div class="row g-2 mb-2">
+                                <div class="col-md-10"><input id="customCommand" class="form-control" placeholder="Enter Custom Command"></div>
+                                <div class="col-md-2"><button class="btn btn-info w-100" onclick="sendCustomCommand()">Send</button></div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">MQTT Logs</div>
+                        <div class="card-body">
+                            <textarea id="logs" rows="10" class="form-control" readonly></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button id="csvBtn" class="btn btn-success">Export CSV</button>
+                        <button id="jsonBtn" class="btn btn-secondary">Export JSON</button>
+                        <button id="clearBtn" class="btn btn-danger">Clear Logs</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="settingsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Dashboard Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Subscribe Topic</label>
+                            <input id="settingTopic" class="form-control" value="stm32/temp">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Publish Topic</label>
+                            <input id="settingPublish" class="form-control" value="stm32/f407/command">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Temperature Alarm (°C)</label>
+                            <input id="alarmTemp" class="form-control" type="number" value="40">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Maximum Chart Samples</label>
+                            <input id="maxSamples" class="form-control" type="number" value="50">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" onclick="saveSettings()">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-gauges/gauge.min.js"></script>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="js/login.js"></script>
+    <script src="js/mqtt.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/dashboard.js"></script>
+
+    <script>
+        window.addEventListener("load", function () {
+            const connectBtn = document.getElementById("connectBtn");
+            const disconnectBtn = document.getElementById("disconnectBtn");
+            const publishBtn = document.getElementById("publishBtn");
+            const csvBtn = document.getElementById("csvBtn");
+            const jsonBtn = document.getElementById("jsonBtn");
+            const clearBtn = document.getElementById("clearBtn");
+
+            if (connectBtn) connectBtn.addEventListener("click", mqttConnect);
+            if (disconnectBtn) disconnectBtn.addEventListener("click", mqttDisconnect);
+            if (publishBtn) publishBtn.addEventListener("click", mqttPublish);
+            if (csvBtn) csvBtn.addEventListener("click", exportCSV);
+            if (jsonBtn) jsonBtn.addEventListener("click", exportJSON);
+            if (clearBtn) clearBtn.addEventListener("click", clearLogs);
+        });
+    </script>
+</body>
+</html>
